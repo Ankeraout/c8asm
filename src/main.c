@@ -122,6 +122,14 @@ int main(int argc, char** argv) {
 }
 
 void define_label(char* name, int address) {
+	// Check if the label was not defined earlier
+	for(int i = 0; i < symbolTableSize; i++) {
+		if(strcmp(name, symbolTable[i]) == 0) {
+			fprintf(stderr, "Error: symbol '%s' redefined on line %d.\n", name, yylineno);
+			exit(1);
+		}
+	}
+	
 	symbolTable = realloc(symbolTable, sizeof(Symbol) * (symbolTableSize + 1));
 	
 	if(symbolTable == NULL) {
