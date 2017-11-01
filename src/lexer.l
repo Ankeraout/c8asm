@@ -81,6 +81,10 @@ V[0-9A-F] {
 		yylval.ival += yytext[i] - '0';
 		i++;
 	}
+
+	if(yylval.ival >= 256) {
+		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
+	}
 	
 	return NUMBER;
 }
@@ -95,6 +99,10 @@ V[0-9A-F] {
 		yylval.ival += yytext[i] - '0';
 		i++;
 	}
+
+	if(yylval.ival >= 256) {
+		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
+	}
 	
 	return NUMBER;
 }
@@ -108,6 +116,10 @@ V[0-9A-F] {
 		yylval.ival *= 10;
 		yylval.ival += yytext[i] - '0';
 		i++;
+	}
+
+	if(yylval.ival >= 256) {
+		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
 	}
 	
 	return NUMBER;
@@ -131,6 +143,10 @@ V[0-9A-F] {
 		
 		i++;
 	}
+
+	if(yylval.ival >= 256) {
+		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
+	}
 	
 	return NUMBER;
 }
@@ -144,6 +160,10 @@ V[0-9A-F] {
 		yylval.ival *= 10;
 		yylval.ival += yytext[i] - '0';
 		i++;
+	}
+
+	if(yylval.ival >= 256) {
+		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
 	}
 	
 	return NUMBER;
