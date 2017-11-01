@@ -175,7 +175,7 @@ V[0-9A-F] {
 }
 
 . {
-	fprintf(stderr, "Warning: ignoring unexpected character '%c' at line %d.\n", yytext[0], yylineno);
+	fprintf(stderr, "Warning: ignoring unexpected character '%c' on line %d.\n", yytext[0], yylineno);
 }
 
 %%

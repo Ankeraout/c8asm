@@ -194,6 +194,6 @@ int currentBufferAddress() {
 }
 
 void die(char* error) {
-	fprintf(stderr, "Error: %s at line %d.\n", error, yylineno);
+	fprintf(stderr, "Error: %s on line %d.\n", error, yylineno);
 	exit(1);
 }
