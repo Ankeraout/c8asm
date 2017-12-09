@@ -56,6 +56,19 @@ R { return KEYWORD_R; }
 : { return TOK_COLON; }
 ;.*\n {}
 
+- { return TOK_MINUS; }
+\+ { return TOK_PLUS; }
+\* { return TOK_MULTIPLY; }
+\/ { return TOK_DIVIDE; }
+\<\< { return TOK_SHIFT_LEFT; }
+\>\> { return TOK_SHIFT_RIGHT; }
+& { return TOK_AND; }
+\| { return TOK_OR; }
+\^ { return TOK_XOR; }
+! { return TOK_NOT; }
+\( { return TOK_LPAREN; }
+\) { return TOK_RPAREN; }
+
 ORG { return KEYWORD_ORG; }
 DB { return KEYWORD_DB; }
 
@@ -81,10 +94,6 @@ V[0-9A-F] {
 		yylval.ival += yytext[i] - '0';
 		i++;
 	}
-
-	if(yylval.ival >= 256) {
-		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
-	}
 	
 	return NUMBER;
 }
@@ -99,10 +108,6 @@ V[0-9A-F] {
 		yylval.ival += yytext[i] - '0';
 		i++;
 	}
-
-	if(yylval.ival >= 256) {
-		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
-	}
 	
 	return NUMBER;
 }
@@ -116,10 +121,6 @@ V[0-9A-F] {
 		yylval.ival *= 10;
 		yylval.ival += yytext[i] - '0';
 		i++;
-	}
-
-	if(yylval.ival >= 256) {
-		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
 	}
 	
 	return NUMBER;
@@ -143,10 +144,6 @@ V[0-9A-F] {
 		
 		i++;
 	}
-
-	if(yylval.ival >= 256) {
-		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
-	}
 	
 	return NUMBER;
 }
@@ -161,10 +158,6 @@ V[0-9A-F] {
 		yylval.ival += yytext[i] - '0';
 		i++;
 	}
-
-	if(yylval.ival >= 256) {
-		fprintf(stderr, "Warning: out of range integer on line %d.\n", yylineno);
-	}
 	
 	return NUMBER;
 }
@@ -175,7 +168,8 @@ V[0-9A-F] {
 }
 
 . {
-	fprintf(stderr, "Warning: ignoring unexpected character '%c' on line %d.\n", yytext[0], yylineno);
+	fprintf(stderr, "Error: Unexpected character '%c' on line %d.\n", yytext[0], yylineno);
+	exit(1);
 }
 
 %%

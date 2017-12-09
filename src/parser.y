@@ -70,8 +70,23 @@ extern void die(char* error);
 %token TOK_COLON;
 %token TOK_NEWLINE;
 
+%token TOK_MINUS;
+%token TOK_PLUS;
+%token TOK_MULTIPLY;
+%token TOK_DIVIDE;
+%token TOK_SHIFT_LEFT;
+%token TOK_SHIFT_RIGHT;
+%token TOK_AND;
+%token TOK_OR;
+%token TOK_XOR;
+%token TOK_NOT;
+%token TOK_LPAREN;
+%token TOK_RPAREN;
+
 %token KEYWORD_ORG;
 %token KEYWORD_DB;
+
+%type<ival> mathematical_expression;
 
 %start program
 
@@ -147,7 +162,11 @@ instruction_ret
 	;
 	
 instruction_sys
-	: KEYWORD_SYS NUMBER {
+	: KEYWORD_SYS mathematical_expression {
+		if($2 < 0 || $2 >= 4096) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x00 | (($2 >> 8) & 0x0f));
 		buffer_writeByte($2 & 0xff);
 	}
@@ -168,8 +187,12 @@ instruction_jp
 			die("Only V0 is allowed here");
 		}
 	}
-	| KEYWORD_JP REGISTER_Vx TOK_COMMA NUMBER {
+	| KEYWORD_JP REGISTER_Vx TOK_COMMA mathematical_expression {
 		if($2 == 0) {
+			if($4 < 0 || $4 >= 4096) {
+				fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+			}
+
 			buffer_writeByte(0xb0 | (($4 >> 8) & 0x0f));
 			buffer_writeByte($4 & 0xff);
 		} else {
@@ -181,7 +204,11 @@ instruction_jp
 		buffer_writeByte(0x10);
 		buffer_writeByte(0x00);
 	}
-	| KEYWORD_JP NUMBER {
+	| KEYWORD_JP mathematical_expression {
+		if($2 < 0 || $2 >= 4096) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x10 | (($2 >> 8) & 0x0f));
 		buffer_writeByte($2 & 0xff);
 	}
@@ -193,14 +220,22 @@ instruction_call
 		buffer_writeByte(0x20);
 		buffer_writeByte(0x00);
 	}
-	| KEYWORD_CALL NUMBER {
+	| KEYWORD_CALL mathematical_expression {
+		if($2 < 0 || $2 >= 4096) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x20 | (($2 >> 8) & 0x0f));
 		buffer_writeByte($2 & 0xff);
 	}
 	;
 	
 instruction_se
-	: KEYWORD_SE REGISTER_Vx TOK_COMMA NUMBER {
+	: KEYWORD_SE REGISTER_Vx TOK_COMMA mathematical_expression {
+		if($4 < 0 || $4 >= 256) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x30 | $2);
 		buffer_writeByte($4 & 0xff);
 	}
@@ -211,7 +246,11 @@ instruction_se
 	;
 	
 instruction_sne
-	: KEYWORD_SNE REGISTER_Vx TOK_COMMA NUMBER {
+	: KEYWORD_SNE REGISTER_Vx TOK_COMMA mathematical_expression {
+		if($4 < 0 || $4 >= 256) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x40 | $2);
 		buffer_writeByte($4 & 0xff);
 	}
@@ -222,7 +261,11 @@ instruction_sne
 	;
 	
 instruction_ld
-	: KEYWORD_LD REGISTER_Vx TOK_COMMA NUMBER {
+	: KEYWORD_LD REGISTER_Vx TOK_COMMA mathematical_expression {
+		if($4 < 0 || $4 >= 256) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x60 | $2);
 		buffer_writeByte($4);
 	}
@@ -235,7 +278,11 @@ instruction_ld
 		buffer_writeByte(0xa0);
 		buffer_writeByte(0x00);
 	}
-	| KEYWORD_LD KEYWORD_I TOK_COMMA NUMBER {
+	| KEYWORD_LD KEYWORD_I TOK_COMMA mathematical_expression {
+		if($4 < 0 || $4 >= 4096) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0xa0 | (($4 >> 8) & 0x0f));
 		buffer_writeByte($4 & 0xff);
 	}
@@ -286,7 +333,11 @@ instruction_ld
 	;
 	
 instruction_add
-	: KEYWORD_ADD REGISTER_Vx TOK_COMMA NUMBER {
+	: KEYWORD_ADD REGISTER_Vx TOK_COMMA mathematical_expression {
+		if($2 < 0 || $2 >= 256) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x70 | $2);
 		buffer_writeByte($4);
 	}
@@ -350,14 +401,22 @@ instruction_shl
 	;
 	
 instruction_rnd
-	: KEYWORD_RND REGISTER_Vx TOK_COMMA NUMBER {
+	: KEYWORD_RND REGISTER_Vx TOK_COMMA mathematical_expression {
+		if($2 < 0 || $2 >= 256) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0xc0 | $2);
 		buffer_writeByte($4);
 	}
 	;
 	
 instruction_drw
-	: KEYWORD_DRW REGISTER_Vx TOK_COMMA REGISTER_Vx TOK_COMMA NUMBER {
+	: KEYWORD_DRW REGISTER_Vx TOK_COMMA REGISTER_Vx TOK_COMMA mathematical_expression {
+		if($2 < 0 || $2 >= 16) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0xd | $2);
 		buffer_writeByte(($4 << 4) | $6);
 	}
@@ -378,7 +437,11 @@ instruction_sknp
 	;
 	
 instruction_scd
-	: KEYWORD_SCD NUMBER {
+	: KEYWORD_SCD mathematical_expression {
+		if($2 < 0 || $2 >= 16) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte(0x00);
 		buffer_writeByte(0xc0 | $2);
 	}
@@ -420,14 +483,60 @@ instruction_high
 	;
 	
 org_directive
-	: KEYWORD_ORG NUMBER {
+	: KEYWORD_ORG mathematical_expression {
 		change_org($2);
 	}
 	;
 	
 db_directive
-	: KEYWORD_DB NUMBER {
+	: KEYWORD_DB mathematical_expression {
+		if($2 < 0 || $2 >= 256) {
+			fprintf(stderr, "Warning: out of range expression value on line %d.\n", yylineno);
+		}
+
 		buffer_writeByte($2);
+	}
+	;
+
+mathematical_expression
+	: NUMBER {
+		$$ = $1;
+	}
+	| TOK_MINUS NUMBER {
+		$$ = -$2;
+	}
+	| mathematical_expression TOK_MINUS mathematical_expression {
+		$$ = $1 - $3;
+	}
+	| mathematical_expression TOK_PLUS mathematical_expression {
+		$$ = $1 + $3;
+	}
+	| mathematical_expression TOK_MULTIPLY mathematical_expression {
+		$$ = $1 * $3;
+	}
+	| mathematical_expression TOK_DIVIDE mathematical_expression {
+		$$ = $1 / $3;
+	}
+	| mathematical_expression TOK_SHIFT_LEFT mathematical_expression {
+		$$ = $1 << $3;
+	}
+	| mathematical_expression TOK_SHIFT_RIGHT mathematical_expression {
+		$$ = $1 >> $3;
+	}
+	| mathematical_expression TOK_AND mathematical_expression {
+		$$ = $1 & $3;
+	}
+	| mathematical_expression TOK_OR mathematical_expression {
+		$$ = $1 | $3;
+	}
+	| mathematical_expression TOK_XOR mathematical_expression {
+		$$ = $1 ^ $3;
+	}
+	| TOK_NOT mathematical_expression {
+		$$ = !$2;
+	}
+	| TOK_LPAREN mathematical_expression TOK_RPAREN {
+		$$ = $2;
 	}
 	;
 
